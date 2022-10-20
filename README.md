@@ -1,2 +1,3 @@
-# proof_of_concepts
-Proof of concept for the new project structure
+# Sumbox
+
+Store your ideas here! They will remail till you need them again!
