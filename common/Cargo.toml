@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 serde = {version = "*", features = ["derive"] }
+axum = "0.5.16"
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.2" }
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.2" }

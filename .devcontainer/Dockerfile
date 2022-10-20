@@ -35,7 +35,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    && apt-get autoremove -y && apt-get clean -y
 
 
-
 # Install PSQL 14 client 
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
@@ -48,20 +47,20 @@ RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 
-USER $USERNAME
-
-RUN cargo install cargo-chef --locked
-
 RUN curl https://github.com/watchexec/cargo-watch/releases/download/v7.8.0/cargo-watch-v7.8.0-x86_64-unknown-linux-musl.tar.xz -L -o cargo-watch.tar.xz \
     && tar -xf cargo-watch.tar.xz \
     && mv cargo-watch-v7.8.0-x86_64-unknown-linux-musl/cargo-watch $CARGO_HOME/bin
+
+USER $USERNAME
+
+# Install 
+RUN cargo install cargo-chef --locked
 
 # Essential tools
 RUN rustup component add rustfmt clippy
 
 # For musl builds
 RUN rustup target add x86_64-unknown-linux-musl
-
 
 # Pulumi for infrastructure as code.
 RUN curl -fsSL https://get.pulumi.com | sudo -E bash -
