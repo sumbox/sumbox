@@ -11,6 +11,8 @@
         exp: usize,
     }
 
+
+    
     impl Claims {
         pub fn encode(user: &User) -> String {
             let claims = Claims {
@@ -29,6 +31,6 @@
             )
             .expect("Failed to encode cookie");
 
-            return token;
+            token
         }
     }

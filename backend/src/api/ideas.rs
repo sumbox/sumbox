@@ -44,22 +44,11 @@ pub async fn create_idea(db:Database, Json(input): Json<IdeaRequest>) -> AppJson
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 
     // Add tests here 
     // #[test]
     // fn it_works() { 
     //     assert_eq!(1,1);
     // }
-
-    #[test]
-    fn test_get_idea() {
-        assert_eq!(true,true);
-    }
-
-    #[test]
-    fn test_create_idea() {
-        assert_eq!(true,true);
-    }
-
 }
