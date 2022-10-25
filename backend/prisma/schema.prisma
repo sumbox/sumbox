@@ -1,6 +1,6 @@
 generator client {
-    provider      = "cargo prisma"
-    output        = "../src/db.rs"
+  provider = "cargo prisma"
+  output   = "../src/db.rs"
 }
 
 datasource db {
@@ -8,11 +8,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Idea {
-  id         Int      @id @default(autoincrement())
-  title      String   @db.VarChar(255)
-  body       String
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @default(now()) @db.Timestamp(6)
+model User {
+  id      Int       @id @default(autoincrement())
+  email   String    @unique
+  name    String?
+  role    Role      @default(USER)
+  profile Profile?
+  Vote    Vote[]
+  Comment Comment[]
 }
 
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int    @unique
+}
+
+model Tag {
+  id     Int    @id @default(autoincrement())
+  name   String
+  Idea   Idea?  @relation(fields: [ideaId], references: [id])
+  ideaId Int?
+}
+
+model Vote {
+  id     Int      @id @default(autoincrement())
+  voteType VoteType
+  user   User?    @relation(references: [id], fields: [userId])
+  idea   Idea?    @relation(fields: [ideaId], references: [id])
+  ideaId Int?
+  userId Int?
+}
+
+model Comment {
+  id     Int    @id @default(autoincrement())
+  body   String
+  user   User?  @relation(references: [id], fields: [userId])
+  Idea   Idea?  @relation(fields: [ideaId], references: [id])
+  ideaId Int?
+  userId Int?
+}
+
+model Idea {
+  id           Int       @id @default(autoincrement())
+  title        String    @db.VarChar(255)
+  body         String
+  comments     Comment[]
+  votes        Vote[]
+  tags         Tag[]
+  ///  Related Ideas self refence 
+  relatedId    Int?
+  related      Idea?     @relation("RelatedIdeas", fields: [relatedId], references: [id])
+  relatedIdeas Idea[]    @relation("RelatedIdeas")
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime  @default(now()) @db.Timestamp(6)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
