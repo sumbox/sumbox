@@ -1,7 +1,7 @@
-use prisma_client_rust::{QueryError,};
-use axum::{http::StatusCode};
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use prisma_client_rust::prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation};
+use prisma_client_rust::QueryError;
 
 pub enum AppError {
     PrismaError(QueryError),
@@ -32,16 +32,13 @@ impl IntoResponse for AppError {
     }
 }
 
-
-
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    //use super::*;
 
-    // Add tests here 
+    // Add tests here
     // #[test]
-    // fn it_works() { 
+    // fn it_works() {
     //     assert_eq!(1,1);
     // }
 }

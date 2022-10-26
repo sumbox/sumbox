@@ -1,19 +1,19 @@
 use axum::{
-    extract::Extension, 
-    Router, 
-    body::{Body, Bytes}, 
-    middleware::{self, Next}, 
-    http::{Request,StatusCode}, 
-    response::{IntoResponse, Response}
+    body::{Body, Bytes},
+    extract::Extension,
+    http::{Request, StatusCode},
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
+    Router,
 };
 
 use std::sync::Arc;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod db;
-mod config;
-mod types;
 mod api;
+mod config;
+mod db;
+mod types;
 
 #[tokio::main]
 async fn main() {
@@ -21,29 +21,26 @@ async fn main() {
     let prisma_client = Arc::new(db::new_client().await.unwrap());
     #[cfg(debug)]
     prisma_client._db_push(false).await.unwrap();
-    
+
     tracing_subscriber::registry()
-    .with(tracing_subscriber::EnvFilter::new(
-        std::env::var("RUST_LOG")
-            .unwrap_or_else(|_| "example_print_request_response=debug,tower_http=debug".into()),
-    ))
-    .with(tracing_subscriber::fmt::layer())
-    .init();
-
-
+        .with(tracing_subscriber::EnvFilter::new(
+            std::env::var("RUST_LOG")
+                .unwrap_or_else(|_| "example_print_request_response=debug,tower_http=debug".into()),
+        ))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
     let app = Router::new()
         .nest("/api", api::ideas::create_route())
-        .nest("/auth",api::authenticate::create_route()) 
+        .nest("/auth", api::authenticate::create_route())
         .layer(Extension(prisma_client))
         .layer(middleware::from_fn(print_request_response));
 
     axum::Server::bind(&config.server_address)
-    .serve(app.into_make_service())
-    .await
-    .unwrap();
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
-
 
 async fn print_request_response(
     req: Request<Body>,
@@ -83,5 +80,3 @@ where
 
     Ok(bytes)
 }
-
-

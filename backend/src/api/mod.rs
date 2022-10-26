@@ -1,2 +1,2 @@
-pub mod ideas;
 pub mod authenticate;
+pub mod ideas;

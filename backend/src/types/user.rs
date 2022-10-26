@@ -1,6 +1,5 @@
-
+use serde::Deserialize;
 use std::env::var;
-use serde::{Deserialize};
 
 #[derive(Deserialize)]
 pub struct User {
@@ -13,7 +12,7 @@ impl User {
         let email = var("AUTH_EMAIL").expect("AUTH_EMAIL must be set");
         let password = var("AUTH_PASSWORD").expect("AUTH_PASSWORD must be set");
 
-        self.email==email && self.password==password
+        self.email == email && self.password == password
     }
 }
 
@@ -23,19 +22,25 @@ mod tests {
 
     // Test Valid
     #[test]
-    fn test_is_valid() { 
-        let eml  = var("AUTH_EMAIL").expect("AUTH_EMAIL must be set");
+    fn test_is_valid() {
+        let eml = var("AUTH_EMAIL").expect("AUTH_EMAIL must be set");
         let pwd = var("AUTH_PASSWORD").expect("AUTH_PASSWORD must be set");
-        let v: User = User { email: eml, password: pwd};
-        assert!(v.is_valid()) 
+        let v: User = User {
+            email: eml,
+            password: pwd,
+        };
+        assert!(v.is_valid())
     }
 
     // Test Invalid
     #[test]
-    fn test_is_invalid() { 
-        let eml  = var("AUTH_EMAIL").expect("AUTH_EMAIL must be set");
+    fn test_is_invalid() {
+        let eml = var("AUTH_EMAIL").expect("AUTH_EMAIL must be set");
         let pwd = String::from("aaa");
-        let v: User = User { email: eml, password: pwd};
-        assert!(!v.is_valid()) 
+        let v: User = User {
+            email: eml,
+            password: pwd,
+        };
+        assert!(!v.is_valid())
     }
 }
