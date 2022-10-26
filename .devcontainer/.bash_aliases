@@ -16,4 +16,4 @@ alias cw='mold -run cargo watch --no-gitignore -i "*.scss" -i "*.ts" -i node_mod
 alias nrs='npm run start'
 
 # Database
-alias db='psql $DATABASE_URL'
+alias db='psql -h $POSTGRES_HOSTNAME -p $POSTGRES_PORT -U $POSTGRES_USER'
