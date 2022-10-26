@@ -1,0 +1,18 @@
+[tasks.push]
+clear = true
+command = "cargo"
+args = ["prisma", "db", "push"]
+dependencies = ["generate"]
+
+[tasks.generate]
+clear = true
+command = "cargo"
+args = ["prisma", "generate"]
+
+[tasks.build]
+description = "Runs the rust compiler."
+category = "Build"
+command = "cargo"
+args = ["build", "--all-features"]
+dependencies = ["push"]
+
