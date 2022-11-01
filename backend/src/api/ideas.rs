@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use common::AppError;
 
-type AppResult<T> = Result<T, AppError>;
+pub type AppResult<T> = Result<T, AppError>;
 type AppJsonResult<T> = AppResult<Json<T>>;
 
 type Database = Extension<std::sync::Arc<db::PrismaClient>>;

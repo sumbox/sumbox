@@ -1,37 +1,32 @@
-use axum::{extract::Json, http::StatusCode, routing::post, Router};
-use axum_extra::extract::cookie::{Cookie, CookieJar};
+use anyhow::Context;
+use axum::{ routing::post, Router, TypedHeader, headers::{Authorization, authorization::{Basic, Credentials}}};
 
-use super::super::types::{Claims, User};
+use hyper::StatusCode;
+use secrecy::Secret;
+
+use crate::types::WebError;
+
+use super::{super::types::{Claims}, ideas::AppResult};
 
 pub fn create_route() -> Router {
     Router::new()
         .route("/login", post(login))
-        .route("/logoff", post(logout))
+        // .route("/logoff", post(logout))
 }
 
-pub async fn login(
-    Json(body): Json<User>,
-    jar: CookieJar,
-) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if body.is_valid() {
-        if jar.get("sumboxlogin").is_none() {
-            let token = Claims::encode(&body);
-            Ok((
-                jar.add(Cookie::new("sumboxlogin", token)),
-                String::from("OK"),
-            ))
-        } else {
-            Err((StatusCode::UNAUTHORIZED, "Already Logged In".to_string()))
-        }
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Invalid Credentials".to_string()))
-    }
+async fn login(
+    TypedHeader(headers): TypedHeader<Authorization<Basic>>,
+) -> AppResult<()> {
+    let _credentials = auth(&headers);
+    println!("Credentials {:?}", _credentials);
+    Ok(())
 }
 
-pub async fn logout(jar: CookieJar) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if jar.get("sumboxlogin").is_some() {
-        Ok((jar.remove(Cookie::named("sumboxlogin")), String::from("OK")))
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Not Logged In".to_string()))
-    }
+
+fn auth(header: &Authorization<Basic>) -> Result<Claims, anyhow::Error> {
+
+    Ok(Claims {
+        username: header.username().to_owned(),
+        password: Secret::new(header.password().to_owned()),
+    })
 }

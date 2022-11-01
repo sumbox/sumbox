@@ -69,9 +69,13 @@ RUN set -eux; \
 RUN set -eux; \
     cargo install sccache --locked
 
+# Install cargo-make
+RUN set -eux; \
+    cargo install cargo-make --locked
+
 # Essential tools
 RUN set -eux; \
-    rustup component add rustfmt clippy cargo-make 
+    rustup component add rustfmt clippy 
 
 # Pulumi for infrastructure as code.
 RUN set -eux; \
@@ -82,5 +86,6 @@ RUN set -eux; \
     SCCACHE=`which sccache` && mkdir $HOME/.cargo && \
     echo "[build]" > $HOME/.cargo/config.toml && \
     echo "rustc-wrapper = "$SCCACHE"" >> $HOME/.cargo/config.toml
+    
 RUN set -eux; \
     git config --global --add safe.directory /workspace
