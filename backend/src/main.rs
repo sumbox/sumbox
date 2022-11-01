@@ -35,7 +35,7 @@ async fn main() {
         .nest("/auth", api::authenticate::create_route())
         .layer(Extension(prisma_client))
         .layer(middleware::from_fn(print_request_response));
-    
+
     axum::Server::bind(&config.server_address)
         .serve(app.into_make_service())
         .await
