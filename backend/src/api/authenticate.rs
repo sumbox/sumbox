@@ -1,37 +1,71 @@
-use axum::{extract::Json, http::StatusCode, routing::post, Router};
-use axum_extra::extract::cookie::{Cookie, CookieJar};
+use axum::{
+    headers::{
+        authorization::{Basic},
+        Authorization
+    },
+    routing::post,
+    Router, TypedHeader,
+};
 
-use super::super::types::{Claims, User};
+use sha3::Digest;
+use super::{
+    super::types::Claims,
+    ideas::{AppResult, Database},
+};
+use crate::db::user;
+use anyhow::anyhow;
+use common::AuthError;
+use hyper::StatusCode;
+use secrecy::{ExposeSecret, Secret};
 
 pub fn create_route() -> Router {
-    Router::new()
-        .route("/login", post(login))
-        .route("/logoff", post(logout))
+    Router::new().route("/login", post(login))
+    // .route("/logoff", post(logout))
 }
 
-pub async fn login(
-    Json(body): Json<User>,
-    jar: CookieJar,
-) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if body.is_valid() {
-        if jar.get("sumboxlogin").is_none() {
-            let token = Claims::encode(&body);
-            Ok((
-                jar.add(Cookie::new("sumboxlogin", token)),
-                String::from("OK"),
+async fn login(
+    TypedHeader(headers): TypedHeader<Authorization<Basic>>,
+    db: Database,
+) -> AppResult<()> {
+    let credentials = auth(&headers).map_err(|e| {
+        tracing::error!("Error authenticating: {}", e);
+        StatusCode::UNAUTHORIZED
+    });
+
+    let s = validate_credentials(&credentials.unwrap(), &db).await?;
+    println!("{}", s);
+
+    Ok(())
+}
+
+fn auth(header: &Authorization<Basic>) -> Result<Claims, anyhow::Error> {
+    Ok(Claims {
+        username: header.username().to_owned(),
+        password: Secret::new(header.password().to_owned()),
+    })
+}
+
+async fn validate_credentials(
+    credentials: &Claims,
+    db: &Database,
+) -> Result<String, anyhow::Error> {
+    let user_query = db
+        .user()
+        .find_first(vec![user::username::equals(String::from(
+            &credentials.username,
+        )), user::password::equals({
+            format!("{:x}", sha3::Sha3_256::digest(
+                credentials.password.expose_secret().as_bytes()
             ))
-        } else {
-            Err((StatusCode::UNAUTHORIZED, "Already Logged In".to_string()))
+        })])
+        .exec()
+        .await?;
+    match user_query {
+        Some(data) => {
+            Ok(data.id)
         }
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Invalid Credentials".to_string()))
-    }
-}
-
-pub async fn logout(jar: CookieJar) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if jar.get("sumboxlogin").is_some() {
-        Ok((jar.remove(Cookie::named("sumboxlogin")), String::from("OK")))
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Not Logged In".to_string()))
+        None => Err(anyhow!(AuthError::InvalidCredentials(String::from(
+            "Invalid username"
+        )))),
     }
 }

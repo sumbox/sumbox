@@ -85,5 +85,6 @@ RUN set -eux; \
     SCCACHE=`which sccache` && mkdir $HOME/.cargo && \
     echo "[build]" > $HOME/.cargo/config.toml && \
     echo "rustc-wrapper = "$SCCACHE"" >> $HOME/.cargo/config.toml
+    
 RUN set -eux; \
     git config --global --add safe.directory /workspace
