@@ -69,10 +69,9 @@ RUN set -eux; \
 RUN set -eux; \
     cargo install sccache --locked
 
-# Install cargo-make
 RUN set -eux; \
-    cargo install cargo-make --locked
-
+    cargo install cargo-make --locked 
+    
 # Essential tools
 RUN set -eux; \
     rustup component add rustfmt clippy 
