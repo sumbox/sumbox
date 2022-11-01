@@ -1,7 +1,26 @@
+use std::fmt::Display;
+
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use prisma_client_rust::prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation};
 use prisma_client_rust::QueryError;
+
+#[derive(Debug)]
+pub enum AuthError {
+    InvalidCredentials(String),
+    MissingAuthorizationHeader(String),
+    InvalidAuthorizationHeader(String),
+}
+
+impl Display for AuthError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AuthError::InvalidCredentials(msg) => write!(f, "Invalid credentials: {}", msg),
+            AuthError::MissingAuthorizationHeader(msg) => write!(f, "Missing authorization header: {}", msg),
+            AuthError::InvalidAuthorizationHeader(msg) => write!(f, "Invalid authorization header: {}", msg),
+        }
+    }
+}
 
 pub enum AppError {
     PrismaError(QueryError),
@@ -16,6 +35,23 @@ impl From<QueryError> for AppError {
         }
     }
 }
+
+
+impl From<anyhow::Error> for AppError {
+    fn from(error: anyhow::Error) -> Self {
+        match error {
+            // AuthError
+            e if e.is::<AuthError>() => {
+                println!("AuthError: {}", e);
+                AppError::NotFound
+            }
+            _ => {
+                AppError::NotFound
+            }
+        }
+    }
+}
+
 
 // This centralizes all different's errors from our app in one place
 impl IntoResponse for AppError {
