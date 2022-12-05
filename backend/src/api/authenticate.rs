@@ -1,37 +1,48 @@
-use axum::{extract::Json, http::StatusCode, routing::post, Router};
-use axum_extra::extract::cookie::{Cookie, CookieJar};
+use axum::extract::Json;
+use axum::{Extension, Router};
 
-use super::super::types::{Claims, User};
+use axum::routing::get;
+use axum::routing::post;
+use common::AppError;
+use hyper::StatusCode;
+use serde::Deserialize;
+
+type AppResult<T> = Result<T, AppError>;
+type AppJsonResult<T> = AppResult<Json<T>>;
+
+type Database = Extension<std::sync::Arc<db::PrismaClient>>;
+use crate::db::Role;
+use crate::db::{self, account};
+use crate::types::{Account, Comment, Profile, Vote};
 
 pub fn create_route() -> Router {
     Router::new()
+        .route("/register", post(register))
         .route("/login", post(login))
-        .route("/logoff", post(logout))
+        .route("/logoff", post(logoff))
 }
 
-pub async fn login(
-    Json(body): Json<User>,
-    jar: CookieJar,
-) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if body.is_valid() {
-        if jar.get("sumboxlogin").is_none() {
-            let token = Claims::encode(&body);
-            Ok((
-                jar.add(Cookie::new("sumboxlogin", token)),
-                String::from("OK"),
-            ))
-        } else {
-            Err((StatusCode::UNAUTHORIZED, "Already Logged In".to_string()))
-        }
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Invalid Credentials".to_string()))
-    }
+pub async fn register(db: Database, Json(input): Json<Account>) -> AppResult<StatusCode> {
+    let account = db
+        .account()
+        .create(
+            input.email,
+            input.password,
+            vec![
+                account::name::set(input.name),
+                account::role::set(input.role),
+            ],
+        )
+        .exec()
+        .await?;
+
+    Ok(StatusCode::OK)
 }
 
-pub async fn logout(jar: CookieJar) -> Result<(CookieJar, String), (StatusCode, String)> {
-    if jar.get("sumboxlogin").is_some() {
-        Ok((jar.remove(Cookie::named("sumboxlogin")), String::from("OK")))
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Not Logged In".to_string()))
-    }
+pub async fn login(db: Database, Json(input): Json<Account>) -> AppResult<StatusCode> {
+    Ok(StatusCode::OK)
+}
+
+pub async fn logoff(db: Database, Json(input): Json<Account>) -> AppResult<StatusCode> {
+    Ok(StatusCode::OK)
 }

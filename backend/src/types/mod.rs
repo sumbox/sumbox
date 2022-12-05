@@ -1,5 +1,9 @@
-mod claim;
-mod user;
+mod account;
+mod comment;
+mod profile;
+mod vote;
 
-pub type User = user::User;
-pub type Claims = claim::Claims;
+pub type Comment = comment::Comment;
+pub type Vote = vote::Vote;
+pub type Profile = profile::Profile;
+pub type Account = account::Account;

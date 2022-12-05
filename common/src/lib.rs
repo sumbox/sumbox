@@ -2,7 +2,6 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use prisma_client_rust::prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation};
 use prisma_client_rust::QueryError;
-
 pub enum AppError {
     PrismaError(QueryError),
     NotFound,
@@ -17,7 +16,7 @@ impl From<QueryError> for AppError {
     }
 }
 
-// This centralizes all different's errors from our app in one place
+// This centralizes all differents errors from our app in one place
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let status = match self {
@@ -30,15 +29,4 @@ impl IntoResponse for AppError {
 
         status.into_response()
     }
-}
-
-#[cfg(test)]
-mod tests {
-    //use super::*;
-
-    // Add tests here
-    // #[test]
-    // fn it_works() {
-    //     assert_eq!(1,1);
-    // }
 }

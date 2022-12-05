@@ -21,11 +21,11 @@ pub struct IdeaRequest {
 
 pub fn create_route() -> Router {
     Router::new()
-        .route("/idea", get(read_idea))
-        .route("/idea", post(create_update_idea))
+        .route("/ideas", get(read_idea))
+        .route("/ideas", post(create_update_idea))
 }
 
-pub async fn read_idea(db: Database) -> AppResult<Json<Vec<idea::Data>>> {
+pub async fn read_idea(db: Database) -> AppJsonResult<Vec<idea::Data>> {
     let ideas: Vec<idea::Data> = db.idea().find_many(vec![]).exec().await?;
     Ok(Json::from(ideas))
 }
