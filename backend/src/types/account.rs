@@ -1,6 +1,9 @@
-use crate::db::Role;
+
+
+use crate::{db::Role};
 use crate::types::{Comment, Profile, Vote};
 use serde::{Deserialize, Serialize};
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Account {
@@ -12,6 +15,18 @@ pub struct Account {
     pub profile: Option<Profile>,
     pub votes: Option<Vec<Vote>>,
     pub comments: Option<Vec<Comment>>,
+}
+
+pub struct AccountSession {
+    pub id: Option<AccountId>,
+    pub email: String,
+}
+
+
+impl From<Account> for AccountSession {
+    fn from(Account { email, id, .. }: Account) -> Self {
+        AccountSession { email, id }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]

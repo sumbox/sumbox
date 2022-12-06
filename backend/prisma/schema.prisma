@@ -11,7 +11,7 @@ datasource db {
 model Account {
   id      Int       @id @default(autoincrement())
   email   String    @unique
-  password String   
+  password String   @unique
   name    String?
   role    Role      @default(account)
   profile Profile?
@@ -19,8 +19,19 @@ model Account {
   Comment Comment[]
 }
 
+model Confirmation {
+  id      Int       @id @default(autoincrement())
+  email   String
+  expires_at DateTime
+}
+
+model UserSession {
+  id      Int       @id @default(autoincrement())
+  email   String
+}
+
 model Profile {
-  id     Int       @id @default(autoincrement())
+  id     Int          @id @default(autoincrement())
   bio    String
   account   Account   @relation(fields: [accountId], references: [id])
   accountId Int       @unique
